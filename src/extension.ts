@@ -29,12 +29,23 @@ export function activate(context: vscode.ExtensionContext) {
                             themeKind === vscode.ColorThemeKind.HighContrastLight;
             const defaultTextColor = isLight ? "#333333" : "#cccccc"; 
 
+			const themePresets: Record<string, string[]> = {
+    			"dracula": ["#21222C", "#FF5555", "#50FA7B", "#F1FA8C", "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2"],
+    			"nord": ["#3b4252", "#bf616a", "#a3be8c", "#ebcb8b", "#81a1c1", "#b48ead", "#88c0d0", "#e5e9f0"],
+				"gruvbox": ["#282828", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#a89984"],
+				"catppuccin-mocha": ["#45475a", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#bac2de"]
+			};
+
 			const config = vscode.workspace.getConfiguration('stringPreview');
-			const userColors = config.get<string[]>('ansiColors');
-			const fallbackColors = ["#000000", "#cd0000", "#00cd00", "#cdcd00", "#0000ee", "#cd00cd", "#00cdcd", "#e5e5e5"];
+			const selectedPreset = config.get<string>('themePreset') || 'dracula';
+			const customColors = config.get<string[]>('ansiColors');
 
-			const colors = (userColors && userColors.length === 8) ? userColors : fallbackColors;
-
+			let colors: string[];
+			if (selectedPreset !== 'custom' && themePresets[selectedPreset]) {
+				colors = themePresets[selectedPreset];
+			} else {
+				colors = (customColors && customColors.length === 8) ? customColors : themePresets['dracula'];
+			}
             const colorDict: Record<string, RuleTuple> = {
                 "\\\\033\\[3[0-9]m": ["fg", (m: string) => {
                     const index = parseInt(m.slice(-2, -1));

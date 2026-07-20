@@ -13,15 +13,27 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "ANSI Previewer",
+      "title": "ANSI previewer",
       "properties": {
+        "stringPreview.themePreset": {
+          "type": "string",
+          "default": "catppuccin-mocha",
+          "enum": [
+            "dracula",
+            "nord",
+            "gruvbox",
+            "catppuccin-mocha",
+            "custom"
+          ],
+          "description": "Select a prebuilt ANSI color theme, or make your own with 'custom'."
+        },
         "stringPreview.ansiColors": {
           "type": "array",
           "default": [
-            "#000000", "#cd0000", "#00cd00", "#cdcd00", 
-            "#0000ee", "#cd00cd", "#00cdcd", "#e5e5e5"
+            "#21222C", "#FF5555", "#50FA7B", "#F1FA8C", 
+            "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2"
           ],
-          "description": "custom definitions for the 8 standard ANSI colors (Black, Red, Green, Yellow, Blue, Magenta, Cyan, White)."
+          "description": "Custom ANSI color palette (set theme preset to 'custom' to use these.)."
         }
       }
     }
