@@ -9,15 +9,22 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["*"],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "text-.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "ANSI Previewer",
+      "properties": {
+        "stringPreview.ansiColors": {
+          "type": "array",
+          "default": [
+            "#000000", "#cd0000", "#00cd00", "#cdcd00", 
+            "#0000ee", "#cd00cd", "#00cdcd", "#e5e5e5"
+          ],
+          "description": "custom definitions for the 8 standard ANSI colors (Black, Red, Green, Yellow, Blue, Magenta, Cyan, White)."
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
