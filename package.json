@@ -23,9 +23,10 @@
             "nord",
             "gruvbox",
             "catppuccin-mocha",
+            "none",
             "custom"
           ],
-          "description": "Select a prebuilt ANSI color theme, or make your own with 'custom'."
+          "description": "Select a prebuilt ANSI color theme, or make your own with 'custom'\n(none is the default ansi colors.)."
         },
         "stringPreview.ansiColors": {
           "type": "array",
