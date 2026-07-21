@@ -35,6 +35,11 @@
             "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2"
           ],
           "description": "Custom ANSI color palette (set theme preset to 'custom' to use these.)."
+        },
+        "stringPreview.enableColorBoxes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable color pickers next to ANSI escape codes in the editor."
         }
       }
     }

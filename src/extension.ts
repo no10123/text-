@@ -5,6 +5,30 @@ type RuleTuple = ["fg" | "bg" | "reset", ColorAction, boolean?];
 
 export function activate(context: vscode.ExtensionContext) {
     
+	const tc = {
+    			"dracula":          ["#21222C", "#FF5555", "#50FA7B", "#F1FA8C", "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2"],
+    			"nord":             ["#3b4252", "#bf616a", "#a3be8c", "#ebcb8b", "#81a1c1", "#b48ead", "#88c0d0", "#e5e9f0"],
+				"gruvbox":          ["#282828", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#a89984"],
+				"catppuccin-mocha": ["#45475a", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#bac2de"],
+				"none":             ["#000000", "#cc0000", "#00cc00", "#cccc00", "#0000cc", "#cc00cc", "#00cccc"]}
+	const themeKind = vscode.window.activeColorTheme.kind;
+    const isLight = themeKind === vscode.ColorThemeKind.Light || 
+    		        themeKind === vscode.ColorThemeKind.HighContrastLight; 
+	const defaultTextColor = isLight ? "#333333" : "#cccccc";
+	function getColors(a: Record<string, string[]>): string[] {
+		const themePresets: Record<string, string[]> = a;
+		const config = vscode.workspace.getConfiguration('stringPreview');
+		const selectedPreset = config.get<string>('themePreset') || 'dracula';
+		const customColors = config.get<string[]>('ansiColors');
+		let colors: string[];
+		if (selectedPreset !== 'custom' && themePresets[selectedPreset]) {
+			colors = themePresets[selectedPreset];
+		} else {
+			colors = (customColors && customColors.length === 8) ? customColors : themePresets['dracula'];
+		}
+		return colors
+	}
+
     const signatureProvider = vscode.languages.registerSignatureHelpProvider('*', {
         
         provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position) {
@@ -24,28 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (!inString) return undefined; 
 
-            const themeKind = vscode.window.activeColorTheme.kind;
-            const isLight = themeKind === vscode.ColorThemeKind.Light || 
-                            themeKind === vscode.ColorThemeKind.HighContrastLight;
-            const defaultTextColor = isLight ? "#333333" : "#cccccc"; 
+            let colors = getColors(tc);
 
-			const themePresets: Record<string, string[]> = {
-    			"dracula":          ["#21222C", "#FF5555", "#50FA7B", "#F1FA8C", "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2"],
-    			"nord":             ["#3b4252", "#bf616a", "#a3be8c", "#ebcb8b", "#81a1c1", "#b48ead", "#88c0d0", "#e5e9f0"],
-				"gruvbox":          ["#282828", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#a89984"],
-				"catppuccin-mocha": ["#45475a", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#bac2de"],
-				"none":             ["#000000", "#cc0000", "#00cc00", "#cccc00", "#0000cc", "#cc00cc", "#00cccc"]};
-
-			const config = vscode.workspace.getConfiguration('stringPreview');
-			const selectedPreset = config.get<string>('themePreset') || 'dracula';
-			const customColors = config.get<string[]>('ansiColors');
-
-			let colors: string[];
-			if (selectedPreset !== 'custom' && themePresets[selectedPreset]) {
-				colors = themePresets[selectedPreset];
-			} else {
-				colors = (customColors && customColors.length === 8) ? customColors : themePresets['dracula'];
-			}
             const colorDict: Record<string, RuleTuple> = {
                 "\\\\033\\[3[0-9]m": ["fg", (m: string) => {
                     const index = parseInt(m.slice(-2, -1));
@@ -66,10 +70,10 @@ export function activate(context: vscode.ExtensionContext) {
             let currentColor = defaultTextColor; 
             let currentBGColor = "transparent";
             
-            let currentX = 8; // Starting X offset for the background rectangles
+            let currentX = 8;
             
-            let bgRects = ""; // Holds only the background boxes
-            let textTspans = ""; // Holds the perfectly flowing text
+            let bgRects = "";
+            let textTspans = "";
             let cleanCharacterCount = 0; 
 
             for (const token of tokens) {
@@ -153,6 +157,47 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }, '"');
 
+	const colorProvider = vscode.languages.registerColorProvider({ language: 'python' }, {
+        provideDocumentColors(document: vscode.TextDocument): vscode.ColorInformation[] {
+			const config = vscode.workspace.getConfiguration('stringPreview');
+            const enableBoxes = config.get<boolean>('enableColorBoxes', true);
+            if (!enableBoxes) {
+                return [];
+            }
+            const colors: vscode.ColorInformation[] = [];
+            const text = document.getText();
+            
+            const regex = /\\033\[3([0-9])m/g;
+            let match;
+
+            const hexPalette = getColors(tc);
+
+            while ((match = regex.exec(text)) !== null) {
+                const colorIndex = parseInt(match[1]);
+                const hex = hexPalette[colorIndex] || "#cccccc";
+                
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+                const startPos = document.positionAt(match.index);
+                const endPos = document.positionAt(match.index + match[0].length);
+                
+                colors.push(new vscode.ColorInformation(
+                    new vscode.Range(startPos, endPos),
+                    new vscode.Color(r, g, b, 1)
+                ));
+            }
+            return colors;
+        },
+
+        provideColorPresentations(color: vscode.Color, context: { document: vscode.TextDocument; range: vscode.Range }) {
+            //new color
+			return [];
+        }
+    });
+
+    context.subscriptions.push(colorProvider);
     context.subscriptions.push(signatureProvider);
 }
 
