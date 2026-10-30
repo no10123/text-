@@ -1,10 +1,14 @@
 {
-  "name": "text-",
-  "displayName": "text+",
+  "name": "ansi-string-preview",
+  "displayName": "ANSI String Preview",
   "description": "",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.125.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/no10123/text-"
   },
   "categories": [
     "Other"

@@ -386,7 +386,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-// --- Hover Utilities ---
+
 function getDocstringForSymbol(symbol: string): string | undefined {
     return undefined;
 }
