@@ -17,6 +17,7 @@ allows for quick chaning of the color of the escape code.
 
 ## example
 
+if video dosent pop up watch the .mp4 in the repo. 
 <video controls src="Screen Recording 2026-07-20 124803.mp4" title="Title"></video>
 
 ## Requirements
